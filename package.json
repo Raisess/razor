@@ -4,9 +4,9 @@
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
-		"start": "node ./dist/index.js",
-		"compile": "tsc -p ./tsconfig.json",
-		"clean": "rm -r ./dist",
+    "start": "node ./dist/index.js",
+    "compile": "tsc -p ./tsconfig.json",
+    "clean": "rm -r ./dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,9 +20,11 @@
   },
   "homepage": "https://github.com/Raisess/razor#readme",
   "dependencies": {
+    "jsdom": "^16.5.0",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
+    "@types/jsdom": "^16.2.7",
     "@types/node": "^14.14.34",
     "@types/node-fetch": "^2.5.8",
     "typescript": "^4.2.3"
