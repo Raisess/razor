@@ -17,21 +17,23 @@ interface IRazor {
 
 export default class Razor extends AmazonFetcher implements IRazor {
 	private searchCategory: string;
+	private pageLimit:      number;
 
 	private products: Array<Product> = [];
 
-	constructor(amazonUri: string, searchCategory: string) {
+	constructor(amazonUri: string, searchCategory: string, pageLimit: number = 1) {
 		super(amazonUri);
 
 		this.searchCategory = searchCategory;
+		this.pageLimit      = pageLimit;
 	}
 
 	public changeSearchCategory(searchCategory: string): void {
 		this.searchCategory = searchCategory;
 	}
 
-	private async getProductsSectionPageHTMLCollection(): Promise<HTMLCollection> {
-		const html: string = await super.fetchPage(this.searchCategory);
+	private async getProductsSectionPageHTMLCollection(page?: number): Promise<HTMLCollection> {
+		const html: string = await super.fetchPage(this.searchCategory, page);
 		const dom:  JSDOM  = new JSDOM(html);
 
 		return dom.window.document.querySelector(".s-main-slot")?.children!;
@@ -66,9 +68,11 @@ export default class Razor extends AmazonFetcher implements IRazor {
 	}
 
 	public async getProducts(): Promise<Array<Product>> {
-		const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
+		for (let i: number = 1; i <= this.pageLimit; i++) {
+			const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
 
-		await this.collectProductsData(productsSection);
+			await this.collectProductsData(productsSection);
+		}
 
 		return this.products;
 	}

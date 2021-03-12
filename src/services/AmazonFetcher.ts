@@ -11,8 +11,8 @@ export default class AmazonFetcher {
 		return this.amazonUri.includes(".br");
 	}
 
-	protected async fetchPage(category: string): Promise<string> {
-		const req:  any    = await fetch(`${this.amazonUri}/s?k=${category.replace(/\s+/g, "+")}&ref=nb_sb_noss`);
+	protected async fetchPage(category: string, page?: number): Promise<string> {
+		const req:  any    = await fetch(`${this.amazonUri}/s?k=${category.replace(/\s+/g, "+")}&ref=nb_sb_noss${page ? "&page=" + page : ""}`);
 		const html: string = await req.text();
 
 		return html;
