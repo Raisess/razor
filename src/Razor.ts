@@ -2,13 +2,12 @@ import { JSDOM } from "jsdom";
 
 import AmazonFetcher from "./services/AmazonFetcher";
 
-type Product = {
-	name:  string;
-	price: number;
-	uri:   string;
+export type Product = {
+	name:     string;
+	price:    number;
+	uri:      string;
+	__data__: Array<string>;
 };
-
-type ProductCouple = [Product, Array<string>];
 
 interface IRazor {
 	changeSearchCategory(searchCategory: string): void;
@@ -39,7 +38,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 	public async getProducts(): Promise<Array<Product>> {
 		const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
 
-		let productsCouple: Array<ProductCouple> = [];
+		let products: Array<Product> = [];
 
 		for (const product of productsSection) {
 			const productContent: Array<string> = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
@@ -53,20 +52,18 @@ export default class Razor extends AmazonFetcher implements IRazor {
 					tempPrice = tempPrice[tempPrice.length - 1];
 				}
 				
-				productsCouple.push([
+				products.push(
 					{
-						name:  productContent[0],
-						price: tempPrice !== undefined ? parseFloat(tempPrice.replace(",", ".")) : 0,
-						uri:   `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`
+						name:    productContent[0],
+						price:   tempPrice !== undefined ? parseFloat(tempPrice.replace(",", ".")) : 0,
+						uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
+						__data__: productContent
 					},
-					productContent
-				]);
+				);
 			}
 		}
 
-		console.log(productsCouple);
-
-		return [];
+		return products;
 	}
 }
 
