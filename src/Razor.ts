@@ -40,15 +40,16 @@ export default class Razor extends AmazonFetcher implements IRazor {
 	}
 
 	public async getProducts(): Promise<Array<Product>> {
-		const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
-
 		let products: Array<Product> = [];
 
+		const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
+
 		for (const product of productsSection) {
-			const productContent: Array<string> = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
-			const productDataSet: NamedNodeMap  = product.attributes;
+			const productDataSet: NamedNodeMap = product.attributes;
 			
 			if (productDataSet.item(0)?.value) {
+				const productContent: Array<string> = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
+
 				let tempPrice: Array<string> | string = productContent.filter((item: string): boolean => item.includes("$"))[0];
 
 				if (tempPrice !== undefined) {
