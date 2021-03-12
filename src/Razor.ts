@@ -18,6 +18,8 @@ interface IRazor {
 export default class Razor extends AmazonFetcher implements IRazor {
 	private searchCategory: string;
 
+	private products: Array<Product> = [];
+
 	constructor(amazonUri: string, searchCategory: string) {
 		super(amazonUri);
 
@@ -39,11 +41,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		return parseFloat(super.isDotBr() ? priceStr.replace(".", "").replace(",", ".") : priceStr.replace(",", ""));
 	}
 
-	public async getProducts(): Promise<Array<Product>> {
-		let products: Array<Product> = [];
-
-		const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
-
+	private async collectProductsData(productsSection: HTMLCollection): Promise<void> {
 		for (const product of productsSection) {
 			const productDataSet: NamedNodeMap = product.attributes;
 			
@@ -57,18 +55,22 @@ export default class Razor extends AmazonFetcher implements IRazor {
 					tempPrice = tempPrice[tempPrice.length - 1];
 				}
 				
-				products.push(
-					{
-						name:    productContent[0],
-						price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
-						uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
-						__data__: productContent
-					},
-				);
+				this.products.push({
+					name:    productContent[0],
+					price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
+					uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
+					__data__: productContent
+				});
 			}
 		}
+	}
 
-		return products;
+	public async getProducts(): Promise<Array<Product>> {
+		const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
+
+		await this.collectProductsData(productsSection);
+
+		return this.products;
 	}
 }
 
