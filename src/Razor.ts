@@ -35,6 +35,10 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		return dom.window.document.querySelector(".s-main-slot")?.children!;
 	}
 
+	private parsePrice(priceStr: string): number {
+		return parseFloat(super.isDotBr() ? priceStr.replace(".", "").replace(",", ".") : priceStr.replace(",", ""));
+	}
+
 	public async getProducts(): Promise<Array<Product>> {
 		const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
 
@@ -55,7 +59,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 				products.push(
 					{
 						name:    productContent[0],
-						price:   tempPrice !== undefined ? parseFloat(tempPrice.replace(",", ".")) : 0,
+						price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
 						uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
 						__data__: productContent
 					},
