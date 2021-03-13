@@ -1,10 +1,12 @@
 import Razor, { Product } from "./Razor";
 
-const razor: Razor = new Razor("https://www.amazon.com.br", "dom casmurro", 2);
+const razor: Razor = new Razor("https://www.amazon.com.br", "dom casmurro");
 
-(async (): Promise<void> => {
-	const products: Array<Product> = await razor.getProducts();
+razor.on("product", (product: Product): void => {
+	if (product.price < 20) {
+		console.log("cheap!");
+	}
 
-	console.log(products);
-})();
+	console.log(product);
+});
 

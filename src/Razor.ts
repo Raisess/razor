@@ -1,3 +1,4 @@
+import EventEmitter from "events";
 import { JSDOM } from "jsdom";
 
 import AmazonFetcher from "./services/AmazonFetcher";
@@ -11,15 +12,18 @@ export type Product = {
 
 interface IRazor {
 	changeSearchCategory(searchCategory: string): void;
-
-	getProducts(): Promise<Array<Product>>;
+	on(event: string, cb: Function):              void;
 }
 
+enum AVAILABLE_EVENTS {
+	product = "product"
+};
+
 export default class Razor extends AmazonFetcher implements IRazor {
+	private readonly event: EventEmitter = new EventEmitter();
+
 	private searchCategory: string;
 	private pageLimit:      number;
-
-	private products: Array<Product> = [];
 
 	constructor(amazonUri: string, searchCategory: string, pageLimit: number = 1) {
 		super(amazonUri);
@@ -43,7 +47,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		return parseFloat(super.isDotBr() ? priceStr.replace(".", "").replace(",", ".") : priceStr.replace(",", ""));
 	}
 
-	private async collectProductsData(productsSection: HTMLCollection): Promise<void> {
+	private collectProductsData(productsSection: HTMLCollection): void {
 		for (const product of productsSection) {
 			const productDataSet: NamedNodeMap = product.attributes;
 			
@@ -57,7 +61,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 					tempPrice = tempPrice[tempPrice.length - 1];
 				}
 				
-				this.products.push({
+				this.event.emit("product", {
 					name:    productContent[0],
 					price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
 					uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
@@ -67,14 +71,20 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		}
 	}
 
-	public async getProducts(): Promise<Array<Product>> {
-		for (let i: number = 1; i <= this.pageLimit; i++) {
-			const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
+	public on(event: string, cb: Function): void {
+		if (event === AVAILABLE_EVENTS.product) {
+			for (let i: number = 1; i <= this.pageLimit; i++) {
+				(async (): Promise<void> => {
+					const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
 
-			await this.collectProductsData(productsSection);
+					this.collectProductsData(productsSection);
+				})();
+			}
+
+			this.event.on("product", async (product: Product): Promise<void> => {
+				cb(product);
+			});
 		}
-
-		return this.products;
 	}
 }
 
