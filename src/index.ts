@@ -4,7 +4,7 @@ const razor: Razor = new Razor("https://www.amazon.com.br", "livros", 2);
 
 razor.on("product", (product: Product): void => {
 	if (product.price < 20) {
-		console.log("cheap!");
+		console.log(product.name, "is cheap!");
 	}
 
 	console.log(product);

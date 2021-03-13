@@ -34,14 +34,18 @@ import Razor from "./Razor";
  * @param search    string
  * @param maxPages  number, default is 1
  */
-const razor: Razor = new Razor("https://www.amazon.com", "shoes");
+const razor: Razor = new Razor("https://www.amazon.com", "shoes", 2);
 
 razor.on("product", (product: Product): void => {
 	if (product.price < 20) {
-		console.log("cheap!");
+		console.log(product.name, "is cheap!");
 	}
 
 	console.log(product);
+});
+
+razor.on("change_page", (currentPage: number): void => {
+	console.log("changed page, current page is:", currentPage);
 });
 ```
 
