@@ -16,7 +16,8 @@ interface IRazor {
 }
 
 enum AVAILABLE_EVENTS {
-	product = "product"
+	product    = "product",
+	changePage = "change_page"
 };
 
 export default class Razor extends AmazonFetcher implements IRazor {
@@ -40,6 +41,8 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		const html: string = await super.fetchPage(this.searchCategory, page);
 		const dom:  JSDOM  = new JSDOM(html);
 
+		this.event.emit(AVAILABLE_EVENTS.changePage, page);
+
 		return dom.window.document.querySelector(".s-main-slot")?.children!;
 	}
 
@@ -61,7 +64,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 					tempPrice = tempPrice[tempPrice.length - 1];
 				}
 				
-				this.event.emit("product", {
+				this.event.emit(AVAILABLE_EVENTS.product, {
 					name:    productContent[0],
 					price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
 					uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
@@ -81,8 +84,12 @@ export default class Razor extends AmazonFetcher implements IRazor {
 				})();
 			}
 
-			this.event.on("product", async (product: Product): Promise<void> => {
+			this.event.on(AVAILABLE_EVENTS.product, (product: Product): void => {
 				cb(product);
+			});
+		} else if (event === AVAILABLE_EVENTS.changePage) {
+			this.event.on(AVAILABLE_EVENTS.changePage, (page: number): void => {
+				cb(page);
 			});
 		}
 	}
