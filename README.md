@@ -34,11 +34,14 @@ import Razor from "./Razor";
  * @param search    string
  * @param maxPages  number, default is 1
  */
-const razor: Razor = new Razor("https://www.amazon.com", "shoes", 2);
+const razor: Razor = new Razor("https://www.amazon.com", "shoes");
 
-(async (): Promise<void> => {
-	console.log(await razor.getProducts());
-	// returns the products array, try to see data.
+razor.on("product", (product: Product): void => {
+	if (product.price < 20) {
+		console.log("cheap!");
+	}
+
+	console.log(product);
 });
 ```
 
