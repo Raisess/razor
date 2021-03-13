@@ -27,7 +27,7 @@ npm run compile | npm run start
 Can you use razor, its simple.
 
 ```ts
-import Razor from "./Razor";
+import Razor, { Product } from "./Razor";
 
 /*
  * @param amazonUri string
