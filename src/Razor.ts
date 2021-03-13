@@ -1,4 +1,3 @@
-import EventEmitter from "events";
 import { JSDOM } from "jsdom";
 
 import AmazonFetcher from "./services/AmazonFetcher";
@@ -12,19 +11,15 @@ export type Product = {
 
 interface IRazor {
 	changeSearchCategory(searchCategory: string): void;
-	on(event: string, cb: Function):              void;
+
+	getProducts(): Promise<Array<Product>>;
 }
 
-enum AVAILABLE_EVENTS {
-	product    = "product",
-	changePage = "change_page"
-};
-
 export default class Razor extends AmazonFetcher implements IRazor {
-	private readonly event: EventEmitter = new EventEmitter();
-
 	private searchCategory: string;
 	private pageLimit:      number;
+
+	private products: Array<Product> = [];
 
 	constructor(amazonUri: string, searchCategory: string, pageLimit: number = 1) {
 		super(amazonUri);
@@ -41,8 +36,6 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		const html: string = await super.fetchPage(this.searchCategory, page);
 		const dom:  JSDOM  = new JSDOM(html);
 
-		this.event.emit(AVAILABLE_EVENTS.changePage, page || 1);
-
 		return dom.window.document.querySelector(".s-main-slot")?.children!;
 	}
 
@@ -50,7 +43,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		return parseFloat(super.isDotBr() ? priceStr.replace(".", "").replace(",", ".") : priceStr.replace(",", ""));
 	}
 
-	private collectProductsData(productsSection: HTMLCollection): void {
+	private async collectProductsData(productsSection: HTMLCollection): Promise<void> {
 		for (const product of productsSection) {
 			const productDataSet: NamedNodeMap = product.attributes;
 			
@@ -64,7 +57,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 					tempPrice = tempPrice[tempPrice.length - 1];
 				}
 				
-				this.event.emit(AVAILABLE_EVENTS.product, {
+				this.products.push({
 					name:    productContent[0],
 					price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
 					uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
@@ -74,24 +67,14 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		}
 	}
 
-	public on(event: string, cb: Function): void {
-		if (event === AVAILABLE_EVENTS.product) {
-			for (let i: number = 1; i <= this.pageLimit; i++) {
-				(async (): Promise<void> => {
-					const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
+	public async getProducts(): Promise<Array<Product>> {
+		for (let i: number = 1; i <= this.pageLimit; i++) {
+			const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
 
-					this.collectProductsData(productsSection);
-				})();
-			}
-
-			this.event.on(AVAILABLE_EVENTS.product, (product: Product): void => {
-				cb(product);
-			});
-		} else if (event === AVAILABLE_EVENTS.changePage) {
-			this.event.on(AVAILABLE_EVENTS.changePage, (page: number): void => {
-				cb(page);
-			});
+			await this.collectProductsData(productsSection);
 		}
+
+		return this.products;
 	}
 }
 

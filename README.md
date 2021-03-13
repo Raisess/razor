@@ -27,7 +27,7 @@ npm run compile | npm run start
 Can you use razor, its simple.
 
 ```ts
-import Razor, { Product } from "./Razor";
+import Razor from "./Razor";
 
 /*
  * @param amazonUri string
@@ -36,16 +36,9 @@ import Razor, { Product } from "./Razor";
  */
 const razor: Razor = new Razor("https://www.amazon.com", "shoes", 2);
 
-razor.on("product", (product: Product): void => {
-	if (product.price < 20) {
-		console.log(product.name, "is cheap!");
-	}
-
-	console.log(product);
-});
-
-razor.on("change_page", (currentPage: number): void => {
-	console.log("changed page, current page is:", currentPage);
+(async (): Promise<void> => {
+	console.log(await razor.getProducts());
+	// returns the products array, try to see data.
 });
 ```
 

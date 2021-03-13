@@ -1,7 +1,7 @@
 {
   "name": "razor",
-  "version": "1.1.0",
-  "description": "",
+  "version": "1.2.0",
+  "description": "Amazon products scraper, kinda a backend for web crawlers applications, no puppeteer btw",
   "main": "./dist/index.js",
   "scripts": {
     "start": "node ./dist/index.js",
@@ -25,7 +25,6 @@
   },
   "devDependencies": {
     "@types/jsdom": "^16.2.7",
-    "@types/node": "^14.14.34",
     "@types/node-fetch": "^2.5.8",
     "typescript": "^4.2.3"
   }
