@@ -41,7 +41,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		const html: string = await super.fetchPage(this.searchCategory, page);
 		const dom:  JSDOM  = new JSDOM(html);
 
-		this.event.emit(AVAILABLE_EVENTS.changePage, page);
+		this.event.emit(AVAILABLE_EVENTS.changePage, page || 1);
 
 		return dom.window.document.querySelector(".s-main-slot")?.children!;
 	}
