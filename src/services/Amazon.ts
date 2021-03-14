@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 
-export default class AmazonFetcher {
+export default class Amazon {
 	protected readonly amazonUri: string;
 
 	constructor(amazonUri: string) {
