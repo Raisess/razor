@@ -40,8 +40,16 @@ export default class Razor extends AmazonFetcher implements IRazor {
 		return dom.window.document.querySelector(".s-main-slot")?.children!;
 	}
 
-	private parsePrice(priceStr: string): number {
-		return parseFloat(super.isDotBr() ? priceStr.replace(".", "").replace(",", ".") : priceStr.replace(",", ""));
+	private getPrice(productContent: Array<string>): number {
+		let tempPrice: string | undefined = productContent.filter((item: string): boolean => item.includes("$"))[0];
+
+		if (tempPrice !== undefined) {
+			tempPrice = tempPrice.split("$")[1];
+
+			return parseFloat(super.isDotBr() ? tempPrice.replace(".", "").replace(",", ".") : tempPrice.replace(",", ""));
+		}
+
+		return 0;
 	}
 
 	private async collectProductsData(productsSection: HTMLCollection): Promise<void> {
@@ -54,19 +62,12 @@ export default class Razor extends AmazonFetcher implements IRazor {
 			if (productId) {
 				// remove blank data and put the rest on an array.
 				const productContent: Array<string> = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
-
-				// get price data, can be undefined, but we'll check it.
-				let tempPrice: string | undefined = productContent.filter((item: string): boolean => item.includes("$"))[0];
-
-				if (tempPrice !== undefined) {
-					tempPrice = tempPrice.split("$")[1];
-				}
-				
+	
 				this.products.push({
-					id:      productId,
-					name:    productContent[0],
-					price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
-					uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productId}`,
+					id:       productId,
+					name:     productContent[0],
+					price:    this.getPrice(productContent),
+					uri:      `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productId}`,
 					__data__: productContent
 				});
 			}
