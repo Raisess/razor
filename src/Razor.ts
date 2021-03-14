@@ -1,7 +1,7 @@
 import { JSDOM } from "jsdom";
 
 import Amazon from "./services/Amazon";
-import Product from "./structuries/Product";
+import Product from "./structures/Product";
 
 export type ProductData = {
 	id:       string;
