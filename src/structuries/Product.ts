@@ -8,14 +8,16 @@ interface IProduct {
 }
 
 export default class Product implements IProduct {
+	private amazonUri:   string;
 	private isProductBr: boolean;
 	private dataSet:     NamedNodeMap;
 
 	public id:      string | undefined;
 	public content: Array<string>;
 
-	constructor(isProductBr: boolean, product: Element) {
-		this.isProductBr = isProductBr;
+	constructor(amazonUri: string, product: Element) {
+		this.amazonUri   = amazonUri;
+		this.isProductBr = this.amazonUri.includes(".br");
 		this.dataSet     = product.attributes;
 		this.id          = this.dataSet.item(0)?.value;
 		this.content     = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
