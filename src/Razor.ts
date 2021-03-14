@@ -3,6 +3,7 @@ import { JSDOM } from "jsdom";
 import AmazonFetcher from "./services/AmazonFetcher";
 
 export type Product = {
+	id:       string;
 	name:     string;
 	price:    number;
 	uri:      string;
@@ -46,21 +47,26 @@ export default class Razor extends AmazonFetcher implements IRazor {
 	private async collectProductsData(productsSection: HTMLCollection): Promise<void> {
 		for (const product of productsSection) {
 			const productDataSet: NamedNodeMap = product.attributes;
+
+			// first value of data set is the data-asin, we are using this to be our product id, bcz this is used on amazon search, how a param.
+			const productId: string | undefined = productDataSet.item(0)?.value;
 			
-			if (productDataSet.item(0)?.value) {
+			if (productId) {
+				// remove blank data and put the rest on an array.
 				const productContent: Array<string> = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
 
-				let tempPrice: Array<string> | string = productContent.filter((item: string): boolean => item.includes("$"))[0];
+				// get price data, can be undefined, but we'll check it.
+				let tempPrice: string | undefined = productContent.filter((item: string): boolean => item.includes("$"))[0];
 
 				if (tempPrice !== undefined) {
-					tempPrice = tempPrice.split("$");
-					tempPrice = tempPrice[tempPrice.length - 1];
+					tempPrice = tempPrice.split("$")[1];
 				}
 				
 				this.products.push({
+					id:      productId,
 					name:    productContent[0],
 					price:   tempPrice !== undefined ? this.parsePrice(tempPrice) : 0,
-					uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productDataSet.item(0)?.value}`,
+					uri:     `${this.amazonUri}/${productContent[0].replace(/\s+/g, "-")}/dp/${productId}`,
 					__data__: productContent
 				});
 			}
@@ -68,6 +74,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 	}
 
 	public async getProducts(): Promise<Array<Product>> {
+		// pagination solution, can be better, I think.
 		for (let i: number = 1; i <= this.pageLimit; i++) {
 			const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
 
