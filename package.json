@@ -1,6 +1,6 @@
 {
   "name": "razor",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Amazon products scraper, kinda a backend for web crawlers applications, no puppeteer btw",
   "main": "./dist/index.js",
   "scripts": {
