@@ -1,5 +1,3 @@
-import AmazonFetcher from "../services/AmazonFetcher";
-
 interface IProduct {
 	id:      string | undefined;
 	content: Array<string>;
@@ -9,18 +7,18 @@ interface IProduct {
 	getUri():   string;
 }
 
-export default class Product extends AmazonFetcher implements IProduct {
-	private dataSet: NamedNodeMap;
+export default class Product implements IProduct {
+	private isProductBr: boolean;
+	private dataSet:     NamedNodeMap;
 
 	public id:      string | undefined;
 	public content: Array<string>;
 
-	constructor(amazonUri: string, product: Element) {
-		super(amazonUri);
-
-		this.dataSet = product.attributes;
-		this.id      = this.dataSet.item(0)?.value;
-		this.content = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
+	constructor(isProductBr: boolean, product: Element) {
+		this.isProductBr = isProductBr;
+		this.dataSet     = product.attributes;
+		this.id          = this.dataSet.item(0)?.value;
+		this.content     = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
 	}
 
 	public getPrice(): number {
@@ -29,19 +27,19 @@ export default class Product extends AmazonFetcher implements IProduct {
 		if (tempPrice !== undefined) {
 			tempPrice = tempPrice.split("$")[1];
 
-			return parseFloat(super.isDotBr() ? tempPrice.replace(".", "").replace(",", ".") : tempPrice.replace(",", ""));
+			return parseFloat(this.isProductBr ? tempPrice.replace(".", "").replace(",", ".") : tempPrice.replace(",", ""));
 		}
 
 		return 0;
 	}
 
 	public getStars(): number {
-		let tempStars: string | undefined = this.content.filter((item: string): boolean => item.includes(super.isDotBr() ? "estrelas" : "stars"))[0];
+		let tempStars: string | undefined = this.content.filter((item: string): boolean => item.includes(this.isProductBr ? "estrelas" : "stars"))[0];
 
 		if (tempStars !== undefined) {
 			tempStars = tempStars.split(" ")[0];
 
-			return parseFloat(super.isDotBr() ? tempStars.replace(",", ".") : tempStars);
+			return parseFloat(this.isProductBr ? tempStars.replace(",", ".") : tempStars);
 		}
 
 		return 0;
