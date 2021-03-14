@@ -1,6 +1,6 @@
 import { JSDOM } from "jsdom";
 
-import AmazonFetcher from "./services/AmazonFetcher";
+import Amazon from "./services/Amazon";
 import Product from "./structuries/Product";
 
 export type ProductData = {
@@ -18,7 +18,7 @@ interface IRazor {
 	getProducts(): Promise<Array<ProductData>>;
 }
 
-export default class Razor extends AmazonFetcher implements IRazor {
+export default class Razor extends Amazon implements IRazor {
 	private searchCategory: string;
 	private pageLimit:      number;
 
@@ -44,7 +44,7 @@ export default class Razor extends AmazonFetcher implements IRazor {
 
 	private async collectProductsData(productsSection: HTMLCollection): Promise<void> {
 		for (const productData of productsSection) {
-			const product: Product = new Product(this.amazonUri, productData);
+			const product: Product = new Product(super.isDotBr(), productData);
 			
 			if (product.id) {
 				this.products.push({
