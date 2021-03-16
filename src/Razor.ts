@@ -20,13 +20,11 @@ interface IRazor {
 
 export default class Razor extends Amazon implements IRazor {
 	private searchCategory: string;
-	private pageLimit:      number;
 
-	constructor(amazonUri: string, searchCategory: string, pageLimit: number = 1) {
+	constructor(amazonUri: string, searchCategory: string) {
 		super(amazonUri);
 
 		this.searchCategory = searchCategory;
-		this.pageLimit      = pageLimit;
 	}
 
 	public changeSearchCategory(searchCategory: string): void {
@@ -61,11 +59,11 @@ export default class Razor extends Amazon implements IRazor {
 		return products;
 	}
 
-	public async getProducts(): Promise<Array<ProductData>> {
+	public async getProducts(pageLimit: number = 1): Promise<Array<ProductData>> {
 		let products: Array<ProductData> = [];
 
 		// pagination solution, can be better, I think.
-		for (let i: number = 1; i <= this.pageLimit; i++) {
+		for (let i: number = 1; i <= pageLimit; i++) {
 			const productsSection: HTMLCollection     = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
 			const tempProducts:    Array<ProductData> = await this.collectProductsData(productsSection);
 
