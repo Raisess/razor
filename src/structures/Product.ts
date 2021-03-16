@@ -12,15 +12,16 @@ export default class Product implements IProduct {
 	private isProductBr: boolean;
 	private dataSet:     NamedNodeMap;
 
-	public id:      string | undefined;
+	public id:      string;
 	public content: Array<string>;
 
-	constructor(amazonUri: string, product: Element) {
+	constructor(amazonUri: string, product: Element, id?: string) {
 		this.amazonUri   = amazonUri;
 		this.isProductBr = this.amazonUri.includes(".br");
 		this.dataSet     = product.attributes;
-		this.id          = this.dataSet.item(0)?.value;
 		this.content     = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
+
+		this.id = id || this.dataSet.item(0)?.value!;
 	}
 
 	public getPrice(): number {

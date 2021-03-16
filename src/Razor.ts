@@ -80,10 +80,10 @@ export default class Razor extends Amazon implements IRazor {
 	public async getProduct(name: string, id: string): Promise<ProductData> {
 		const productData: Element = await this.getProductPageHTMLElement(name, id);
 
-		const product: Product = new Product(this.amazonUri, productData);
+		const product: Product = new Product(this.amazonUri, productData, id);
 
 		return {
-			id:       id,
+			id:       product.id,
 			name:     product.content[0],
 			price:    product.getPrice(),
 			stars:    product.getStars(),
