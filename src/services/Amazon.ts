@@ -7,15 +7,8 @@ export default class Amazon {
 		this.amazonUri = amazonUri;
 	}
 
-	protected async fetchSearchPage(category: string, page?: number): Promise<string> {
+	protected async fetchPage(category: string, page?: number): Promise<string> {
 		const req:  any    = await fetch(`${this.amazonUri}/s?k=${category.replace(/\s+/g, "+")}&ref=nb_sb_noss${page ? "&page=" + page : ""}`);
-		const html: string = await req.text();
-
-		return html;
-	}
-
-	protected async fetchProductPage(name: string, id: string): Promise<string> {
-		const req:  any    = await fetch(`${this.amazonUri}/${name.replace(/\s+/g, "-")}/dp/${id}`);
 		const html: string = await req.text();
 
 		return html;
