@@ -22,8 +22,6 @@ export default class Razor extends Amazon implements IRazor {
 	private searchCategory: string;
 	private pageLimit:      number;
 
-	private products: Array<ProductData> = [];
-
 	constructor(amazonUri: string, searchCategory: string, pageLimit: number = 1) {
 		super(amazonUri);
 
@@ -49,12 +47,14 @@ export default class Razor extends Amazon implements IRazor {
 		return dom.window.document.querySelector("#centerCol")!;
 	}
 
-	private async collectProductsData(productsSection: HTMLCollection): Promise<void> {
+	private async collectProductsData(productsSection: HTMLCollection): Promise<Array<ProductData>> {
+		let products: Array<ProductData> = [];
+
 		for (const productData of productsSection) {
 			const product: Product = new Product(this.amazonUri, productData);
 			
 			if (product.id) {
-				this.products.push({
+				products.push({
 					id:       product.id,
 					name:     product.content[0],
 					price:    product.getPrice(),
@@ -64,17 +64,22 @@ export default class Razor extends Amazon implements IRazor {
 				});
 			}
 		}
+
+		return products;
 	}
 
 	public async getProducts(): Promise<Array<ProductData>> {
+		let products: Array<ProductData> = [];
+
 		// pagination solution, can be better, I think.
 		for (let i: number = 1; i <= this.pageLimit; i++) {
-			const productsSection: HTMLCollection = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
+			const productsSection: HTMLCollection     = await this.getProductsSectionPageHTMLCollection(i > 1 ? i : undefined);
+			const tempProducts:    Array<ProductData> = await this.collectProductsData(productsSection);
 
-			await this.collectProductsData(productsSection);
+			products.push(...tempProducts);
 		}
 
-		return this.products;
+		return products;
 	}
 
 	public async getProduct(name: string, id: string): Promise<ProductData> {
