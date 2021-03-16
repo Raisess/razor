@@ -32,12 +32,14 @@ import Razor from "./Razor";
 /*
  * @param amazonUri string
  * @param search    string
- * @param maxPages  number, default is 1
  */
-const razor: Razor = new Razor("https://www.amazon.com", "shoes", 2);
+const razor: Razor = new Razor("https://www.amazon.com", "shoes");
 
 (async (): Promise<void> => {
-	console.log(await razor.getProducts());
+	/*
+	 * @param pageLimit number; default is 1
+	 */
+	console.log(await razor.getProducts(2));
 	// returns the products array, try to see data.
 });
 ```
