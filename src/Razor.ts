@@ -49,7 +49,7 @@ export default class Razor extends Amazon implements IRazor {
 			if (product.id) {
 				products.push({
 					id:       product.id,
-					name:     product.content[0],
+					name:     product.getName(),
 					price:    product.getPrice(),
 					stars:    product.getStars(),
 					uri:      product.getUri(),
@@ -84,7 +84,7 @@ export default class Razor extends Amazon implements IRazor {
 			if (product.content[0].toLowerCase().includes(this.searchCategory.toLowerCase())) {
 				return {
 					id:       product.id,
-					name:     product.content[0],
+					name:     product.getName(),
 					price:    product.getPrice(),
 					stars:    product.getStars(),
 					uri:      product.getUri(),

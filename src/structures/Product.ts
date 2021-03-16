@@ -23,6 +23,10 @@ export default class Product implements IProduct {
 		this.id          = this.dataSet.item(0)?.value!;
 	}
 
+	public getName(): string {
+		return this.content[0];
+	}
+
 	public getPrice(): number {
 		let tempPrice: string | undefined = this.content.filter((item: string): boolean => item.includes("$"))[0];
 
