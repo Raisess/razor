@@ -15,7 +15,7 @@ export default class Amazon {
 	}
 
 	protected async fetchProductPage(name: string, id: string): Promise<string> {
-		const req:  any    = await fetch(`${this.amazonUri}/${name}/dp/${id}`);
+		const req:  any    = await fetch(`${this.amazonUri}/${name.replace(/\s+/g, "-")}/dp/${id}`);
 		const html: string = await req.text();
 
 		return html;
