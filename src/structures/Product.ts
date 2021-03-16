@@ -1,5 +1,5 @@
 interface IProduct {
-	id:      string | undefined;
+	id:      string;
 	content: Array<string>;
 
 	getPrice(): number;
@@ -15,13 +15,12 @@ export default class Product implements IProduct {
 	public id:      string;
 	public content: Array<string>;
 
-	constructor(amazonUri: string, product: Element, id?: string) {
+	constructor(amazonUri: string, product: Element) {
 		this.amazonUri   = amazonUri;
 		this.isProductBr = this.amazonUri.includes(".br");
 		this.dataSet     = product.attributes;
 		this.content     = product.textContent?.split("\n").filter((item: string): boolean => item !== "")!;
-
-		this.id = id || this.dataSet.item(0)?.value!;
+		this.id          = this.dataSet.item(0)?.value!;
 	}
 
 	public getPrice(): number {

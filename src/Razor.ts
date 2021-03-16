@@ -15,7 +15,7 @@ export type ProductData = {
 interface IRazor {
 	changeSearchCategory(searchCategory: string): void;
 	getProducts():                                Promise<Array<ProductData>>;
-	getProduct(name: string, id: string):         Promise<ProductData>;
+	getProduct(name: string, id: string):         Promise<ProductData | undefined>;
 }
 
 export default class Razor extends Amazon implements IRazor {
@@ -34,17 +34,10 @@ export default class Razor extends Amazon implements IRazor {
 	}
 
 	private async getProductsSectionPageHTMLCollection(page?: number): Promise<HTMLCollection> {
-		const html: string = await super.fetchSearchPage(this.searchCategory, page);
+		const html: string = await super.fetchPage(this.searchCategory, page);
 		const dom:  JSDOM  = new JSDOM(html);
 
 		return dom.window.document.querySelector(".s-main-slot")?.children!;
-	}
-
-	private async getProductPageHTMLElement(name: string, id: string): Promise<Element> {
-		const html: string = await super.fetchProductPage(name, id);
-		const dom:  JSDOM  = new JSDOM(html);
-
-		return dom.window.document.querySelector("#centerCol")!;
 	}
 
 	private async collectProductsData(productsSection: HTMLCollection): Promise<Array<ProductData>> {
@@ -82,19 +75,25 @@ export default class Razor extends Amazon implements IRazor {
 		return products;
 	}
 
-	public async getProduct(name: string, id: string): Promise<ProductData> {
-		const productData: Element = await this.getProductPageHTMLElement(name, id);
+	public async getProduct(): Promise<ProductData | undefined> {
+		const productsCollection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
 
-		const product: Product = new Product(this.amazonUri, productData, id);
+		for (const productData of productsCollection) {
+			const product: Product = new Product(this.amazonUri, productData);
 
-		return {
-			id:       product.id,
-			name:     product.content[0],
-			price:    product.getPrice(),
-			stars:    product.getStars(),
-			uri:      product.getUri(),
-			__data__: product.content
+			if (product.content[0].toLowerCase().includes(this.searchCategory.toLowerCase())) {
+				return {
+					id:       product.id,
+					name:     product.content[0],
+					price:    product.getPrice(),
+					stars:    product.getStars(),
+					uri:      product.getUri(),
+					__data__: product.content
+				}
+			}
 		}
+
+		return undefined;
 	}
 }
 
