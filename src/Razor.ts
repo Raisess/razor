@@ -74,24 +74,28 @@ export default class Razor extends Amazon implements IRazor {
 	}
 
 	public async getProduct(): Promise<ProductData | undefined> {
-		const productsCollection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
+		try {
+			const productsCollection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
 
-		for (const productData of productsCollection) {
-			const product: Product = new Product(this.amazonUri, productData);
+			for (const productData of productsCollection) {
+				const product: Product = new Product(this.amazonUri, productData);
 
-			if (product.content[0].toLowerCase().includes(this.searchCategory.toLowerCase())) {
-				return {
-					id:       product.id,
-					name:     product.getName(),
-					price:    product.getPrice(),
-					stars:    product.getStars(),
-					uri:      product.getUri(),
-					__data__: product.content
+				if (product.content[0].toLowerCase().includes(this.searchCategory.toLowerCase())) {
+					return {
+						id:       product.id,
+						name:     product.getName(),
+						price:    product.getPrice(),
+						stars:    product.getStars(),
+						uri:      product.getUri(),
+						__data__: product.content
+					}
 				}
 			}
-		}
 
-		return undefined;
+			return undefined;
+		} catch (err) {
+			return undefined;
+		}
 	}
 }
 
