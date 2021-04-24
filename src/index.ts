@@ -1,6 +1,6 @@
 import Razor, { ProductData as Product } from "./Razor";
 
-const razor: Razor = new Razor("https://www.amazon.com.br", "A Prisão do Rei");
+const razor: Razor = new Razor("https://www.amazon.com.br", "A prisão do rei");
 
 (async (): Promise<void> => {
 	//const products: Array<Product> = await razor.getProducts(2);

@@ -19,16 +19,19 @@ interface IRazor {
 }
 
 export default class Razor extends Amazon implements IRazor {
-	private searchCategory: string;
+	private searchCategory: string = "";
 
 	constructor(amazonUri: string, searchCategory: string) {
 		super(amazonUri);
 
-		this.searchCategory = searchCategory;
+		this.changeSearchCategory(searchCategory);
 	}
 
 	public changeSearchCategory(searchCategory: string): void {
-		this.searchCategory = searchCategory;
+		this.searchCategory = searchCategory.toLowerCase()
+		                                      .replace(/\s+/g, "-")
+ 		                                      .normalize("NFD")
+		                                      .replace(/[\u0300-\u036f]/g, "");
 	}
 
 	private async getProductsSectionPageHTMLCollection(page?: number): Promise<HTMLCollection> {
@@ -75,24 +78,9 @@ export default class Razor extends Amazon implements IRazor {
 
 	public async getProduct(): Promise<ProductData | undefined> {
 		try {
-			const productsCollection: HTMLCollection = await this.getProductsSectionPageHTMLCollection();
+			const products: Array<ProductData> = await this.getProducts();
 
-			for (const productData of productsCollection) {
-				const product: Product = new Product(this.amazonUri, productData);
-
-				if (product.content[0].toLowerCase().includes(this.searchCategory.toLowerCase())) {
-					return {
-						id:       product.id,
-						name:     product.getName(),
-						price:    product.getPrice(),
-						stars:    product.getStars(),
-						uri:      product.getUri(),
-						__data__: product.content
-					}
-				}
-			}
-
-			return undefined;
+			return products[0];
 		} catch (err) {
 			return undefined;
 		}
